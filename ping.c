@@ -32,19 +32,16 @@ int main(int argc, char ** argv)
     //The user enter an IP to ping
     char * destination_ip = argv[1];
 
-   
-    // struct in_addr addr;
-    // int error = inet_aton(destination_ip, &addr);
+    //check if the IP is valid
+    struct in_addr addr;
+    int error = inet_pton(AF_INET, destination_ip, &addr); //return a positive num if the IP is valid
 
-    // int len = strlen(argv [1]);
-    // printf ("len = %d\n", len);
-
-    // if (validate_ip(destination_ip) ) {
-    //     printf("Error: Invalid IP address.\n");
-    //     yes = 0;
-    // } else {
-    //     printf("IP address is valid.\n");
-    // }
+    if (error <= 0) {
+        printf("Error: Invalid IP address.\n");
+        yes = 0;
+    } else {
+        printf("IP address is valid.\n");
+    }
 
 
     struct icmp icmphdr; // ICMP-header
