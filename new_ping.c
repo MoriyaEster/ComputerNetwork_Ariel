@@ -194,15 +194,23 @@ int main(int argc, char ** argv)
 
                     // Get the ping response
                     socklen_t len = sizeof(dest_in);
-                    ssize_t bytes_received = -1;
+                    ssize_t bytes_received = 0;
 
-                    while(bytes_received = recvfrom(raw_sock, packet, sizeof(packet), 0, (struct sockaddr *)&dest_in, &len))
+
+                    while((bytes_received <= 0) && isOK)
                     {
+                        bytes_received = recvfrom(raw_sock, packet, sizeof(packet), MSG_DONTWAIT, (struct sockaddr *)&dest_in, &len);
                         if (bytes_received > 0)
                         {
                         printf("Successfuly received one packet, bytes_received: %ld\n",bytes_received);
                         break;
                         }
+                        recvISOK = recv(sock, &isOK, sizeof(isOK), MSG_DONTWAIT);
+                        // printf("ping recv TCP isOK %d\n", isOK);
+
+                    }
+                    if (isOK == 0){
+                        break;
                     }
                     printf("before send\n");
 
