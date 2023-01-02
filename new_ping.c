@@ -17,7 +17,7 @@
 #include <time.h>
 
 #define SOURCE_IP "127.0.0.1"
-#define PORT 9000
+#define PORT 8000
 
 // IPv4 header len without options
 #define IP4_HDRLEN 20
@@ -164,17 +164,23 @@ int main(int argc, char ** argv)
                 gettimeofday(&start, 0);
 
                 //recv from the watchdog if to continue or to exit
-                char isOK = '0';
+                int isOK = 0;
                 printf("ping before recv\n");
-                int recvISOK = recv(sock, &isOK, sizeof(isOK), MSG_DONTWAIT);
-                printf("ping recv TCP isOK %c\n", isOK);
+                //MSG_DONTWAIT
+                //sleep(3);
+                int recvISOK = recv(sock, &isOK, sizeof(isOK), 0);
+                printf("ping recv TCP isOK %d\n", isOK);
 
                 int sentStart = 1;
 
-                if(isOK == '1'){
+                if(isOK){
 
-                    //sent to watchdog that the ping is going to sent now so start the timer
-                    int sentStartTimer = send(sock, &sentStart ,sizeof(sentStart), 0);
+                    // printf("before send\n");
+
+                    // //sent in TCP to watchdog that the ping is going to sent now so start the timer
+                    // int sentStartTimer = send(sock, &sentStart ,sizeof(sentStart), 0);
+
+                    // printf("sentStart: %d\n", sentStart);
 
                     // Send the packet using sendto() for sending datagrams.
                     int bytes_sent = sendto(raw_sock, packet, ICMP_HDRLEN + datalen, 0, (struct sockaddr *)&dest_in, sizeof(dest_in));
@@ -192,15 +198,17 @@ int main(int argc, char ** argv)
 
                     while(bytes_received = recvfrom(raw_sock, packet, sizeof(packet), 0, (struct sockaddr *)&dest_in, &len))
                     {
-                        if (bytes_received> 0)
+                        if (bytes_received > 0)
                         {
                         printf("Successfuly received one packet, bytes_received: %ld\n",bytes_received);
                         break;
                         }
                     }
+                    printf("before send\n");
 
-                    // //sent to watchdog that the pong was received
-                    // int sentStartTimer = send(sock,1 ,1, 0);
+                    //sent in TCP to watchdog that the ping is going to sent now so start the timer
+                    int sentStartTimer = send(sock, &sentStart ,sizeof(sentStart), 0);
+                    printf("sentStart: %d\n", sentStart);
 
                     //save the ip destination to ping
                     char ip_to_ping [IP_LEN];
@@ -232,7 +240,7 @@ int main(int argc, char ** argv)
                     sleep (1);
 
                 }
-                else{
+                else {
                     printf("break\n");
                     break;
                 }
