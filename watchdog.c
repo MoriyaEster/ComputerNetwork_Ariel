@@ -13,7 +13,7 @@
 #include <time.h>
 #include <sys/time.h>
 
-#define PORT 8000
+#define PORT 3000
 #define SOURCE_IP "127.0.0.1"
 
 int main()

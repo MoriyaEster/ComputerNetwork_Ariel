@@ -17,7 +17,7 @@
 #include <time.h>
 
 #define SOURCE_IP "127.0.0.1"
-#define PORT 8000
+#define PORT 3000
 
 // IPv4 header len without options
 #define IP4_HDRLEN 20
