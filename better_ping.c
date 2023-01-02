@@ -51,7 +51,6 @@ int main(int argc, char ** argv)
         sleep(2);
 
         //ping
-        printf("Enter ping_partb\n");
         int yes = 1;
 
         //The user enter an IP to ping
@@ -71,7 +70,6 @@ int main(int argc, char ** argv)
         if (yes){
             //opening a TCP socket
             int sock = socket(AF_INET, SOCK_STREAM, 0);
-            printf ("opening a TCP socket\n");
 
             //check if there is no exception
             if (sock == -1) {
@@ -89,7 +87,6 @@ int main(int argc, char ** argv)
 
             // Make a connection to the receiver with socket SendingSocket.
             int connectResult = connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
-            printf("connect new_ping\n");
 
             //check if there is no exception
             if (connectResult == -1) {
@@ -165,22 +162,12 @@ int main(int argc, char ** argv)
 
                 //recv from the watchdog if to continue or to exit
                 int isOK = 0;
-                printf("ping before recv\n");
-                //MSG_DONTWAIT
-                //sleep(3);
                 int recvISOK = recv(sock, &isOK, sizeof(isOK), 0);
-                printf("ping recv TCP isOK %d\n", isOK);
 
+                //with that var it will sent to the watchdog that got pong
                 int sentStart = 1;
 
                 if(isOK){
-
-                    // printf("before send\n");
-
-                    // //sent in TCP to watchdog that the ping is going to sent now so start the timer
-                    // int sentStartTimer = send(sock, &sentStart ,sizeof(sentStart), 0);
-
-                    // printf("sentStart: %d\n", sentStart);
 
                     // Send the packet using sendto() for sending datagrams.
                     int bytes_sent = sendto(raw_sock, packet, ICMP_HDRLEN + datalen, 0, (struct sockaddr *)&dest_in, sizeof(dest_in));
@@ -189,14 +176,13 @@ int main(int argc, char ** argv)
                         fprintf(stderr, "sendto() failed with error: %d", errno);
                         return -1;
                     }
-                    
-                    printf("Successfuly sent one packet , bytes_sent: %d\n", bytes_sent);
 
                     // Get the ping response
                     socklen_t len = sizeof(dest_in);
                     ssize_t bytes_received = 0;
 
-
+                    /* while the watchdog didnt sent to kill the program and we didnt get pong
+                    continue to try get a pong or message for the watchdog to kill the program  */
                     while((bytes_received <= 0) && isOK)
                     {
                         bytes_received = recvfrom(raw_sock, packet, sizeof(packet), MSG_DONTWAIT, (struct sockaddr *)&dest_in, &len);
@@ -206,17 +192,14 @@ int main(int argc, char ** argv)
                         break;
                         }
                         recvISOK = recv(sock, &isOK, sizeof(isOK), MSG_DONTWAIT);
-                        // printf("ping recv TCP isOK %d\n", isOK);
 
                     }
                     if (isOK == 0){
                         break;
                     }
-                    printf("before send\n");
 
                     //sent in TCP to watchdog that the ping is going to sent now so start the timer
                     int sentStartTimer = send(sock, &sentStart ,sizeof(sentStart), 0);
-                    printf("sentStart: %d\n", sentStart);
 
                     //save the ip destination to ping
                     char ip_to_ping [IP_LEN];
@@ -249,12 +232,11 @@ int main(int argc, char ** argv)
 
                 }
                 else {
-                    printf("break\n");
                     break;
                 }
 
             }
-
+            printf ("Server ip: %s cannot be reached.\n", ip_to_ping);
             close(raw_sock);
             close(sock);
         }

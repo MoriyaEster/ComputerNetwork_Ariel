@@ -18,8 +18,6 @@
 
 int main()
 {
-    printf("hello watchdog\n");
-
     //opening a socket for the sender
     int sock = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -47,8 +45,6 @@ int main()
     // Bind the socket to the port with any IP
     int bindResult = bind(sock, (struct sockaddr *)&recv_addr, sizeof(recv_addr));
 
-    printf("watchdog bind\n");
-
 	//check if there is no exception 
     if (bindResult == -1) {
         printf("Bind failed with error code : %d\n", errno);
@@ -68,8 +64,6 @@ int main()
         return -1;
     }
 
-    printf("watchdog listen\n");
-
     //Accept and incoming connection
     struct sockaddr_in senderAddress;
     socklen_t senderAddressLen = sizeof(senderAddress);
@@ -77,7 +71,6 @@ int main()
     memset(&senderAddress, 0, sizeof(senderAddress));
     senderAddressLen = sizeof(senderAddress);
     int senderSocket = accept(sock, (struct sockaddr *)&senderAddress, &senderAddressLen);
-    printf("watchdog accept\n");
 
     //check if there is no exception
     if (senderSocket == -1) {
@@ -87,53 +80,42 @@ int main()
         return -1;
     }
 
-    //timer
-    //clock_t start, end, test;
-    //save the time for RTT calculate
+    //save the times
     struct timeval start, end;
     gettimeofday(&start, 0);
 
-    int get = 0;
-    int isOK = 1;
-    int sent = 0;
-    int recv2 = 1;
+    int get = 0; //var which save if the better_ping got pong
+    int isOK = 1; // var which sent to the better_ping "you can sent a ping"
+    int sent = 0; // var will contain the number of bytes the send send
+    int recv2 = 1; // var will ask if we got message in the recv
 
-    // save the starting time
-    //start = clock();
-    
+    // save the end time (just for the first ping)
     gettimeofday(&end, 0);
-    //(end = clock()) - start < 10000
-    //(milliseconds = (end.tv_sec - start.tv_sec) * 1000.0f + (end.tv_usec - start.tv_usec) / 1000.0f) < 10000
+
     float milliseconds = 0;
     while ( recv2 > 0)
     {
-
-        printf ("Enter the while %f\n", milliseconds);
         sent = send (senderSocket, &isOK ,sizeof(isOK), 0);
-        printf("watchdog sent is OK %d\n",isOK);
 
         if (get == 1){
-            //start = clock();
+            //save the time the better_ping send "i got a pong" so the timer will restart 
             gettimeofday(&start, 0);
-            printf ("Enter the if\n");
-
         }
 
+        //while we didnt get any message from the better_ping and the timer didnt got to 10 try to recv
         recv2 = 0;
-        printf ("watchdog wait for recv\n");
         while (((milliseconds = (end.tv_sec - start.tv_sec) * 1000.0f + (end.tv_usec - start.tv_usec) / 1000.0f) < 10000) && recv2 <= 0)
         {
             recv2 = recv(senderSocket, &get, sizeof(get), MSG_DONTWAIT); 
-            // printf ("Enter2 the while %d\n",recv2);
             gettimeofday(&end, 0);
         }
 
 
     }
 
+    //if we didn't get a message from the better_ping "I got a pong" and pass 10 minutes, sent to better_ping to kill his program
     isOK = 0;
     send(senderSocket, &isOK,sizeof(isOK), 0);
-    printf ("exit the while\n");
     close (senderSocket);
 
     return 0;
