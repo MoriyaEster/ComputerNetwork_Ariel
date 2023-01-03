@@ -85,7 +85,7 @@ int main(int argc, char ** argv)
             serv_addr.sin_port = htons(PORT); // Port number  
             serv_addr.sin_addr.s_addr = INADDR_ANY; // Internet address
 
-            // Make a connection to the receiver with socket SendingSocket.
+            // Make a connection to the watchdog with socket SendingSocket.
             int connectResult = connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 
             //check if there is no exception

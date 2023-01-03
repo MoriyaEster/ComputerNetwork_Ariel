@@ -32,7 +32,7 @@ int main()
     memset(&recv_addr, 0, sizeof(recv_addr));
 
     recv_addr.sin_family = AF_INET; // Address family, AF_INET unsigned 
-    recv_addr.sin_port = htons(PORT); // receiver port number 
+    recv_addr.sin_port = htons(PORT); // watchdog port number 
     recv_addr.sin_addr.s_addr  = INADDR_ANY; // Internet address
     int rval = inet_pton(AF_INET,"127.0.0.1", &recv_addr.sin_addr);  // convert IPv4 addresses from text to binary form
 
