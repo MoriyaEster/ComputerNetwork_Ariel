@@ -113,6 +113,9 @@ int main(int argc, char ** argv)
             //endless loop ping-pong
             while (yes)
             {
+                //wait for a while so that the system doesn't throw us out
+                sleep (1);
+
                 char data[IP_MAXPACKET] = "This is the ping.\n";
 
                 int datalen = strlen(data) + 1;
@@ -188,7 +191,6 @@ int main(int argc, char ** argv)
                         bytes_received = recvfrom(raw_sock, packet, sizeof(packet), MSG_DONTWAIT, (struct sockaddr *)&dest_in, &len);
                         if (bytes_received > 0)
                         {
-                        printf("Successfuly received one packet, bytes_received: %ld\n",bytes_received);
                         break;
                         }
                         recvISOK = recv(sock, &isOK, sizeof(isOK), MSG_DONTWAIT);
@@ -220,23 +222,19 @@ int main(int argc, char ** argv)
                     //calculate the RTT and print
                     float milliseconds = (end.tv_sec - start.tv_sec) * 1000.0f + (end.tv_usec - start.tv_usec) / 1000.0f;
                     unsigned long microseconds = (end.tv_sec - start.tv_sec) * 1000.0f + (end.tv_usec - start.tv_usec);
-                    printf("RTT: %f milliseconds (%ld microseconds)\n", milliseconds, microseconds);
+                    printf("TIME: %f milliseconds (%ld microseconds)\n\n", milliseconds, microseconds);
 
                     //increase the seq num
                     icmphdr.icmp_seq++;
 
                     bzero(packet, IP_MAXPACKET);
-
-                    //wait for a while so that the system doesn't throw us out
-                    sleep (1);
-
                 }
                 else {
                     break;
                 }
 
             }
-            printf ("Server ip: %s cannot be reached.\n", ip_to_ping);
+            printf ("Server ip: %s cannot be reached.\n", destination_ip);
             close(raw_sock);
             close(sock);
         }

@@ -80,14 +80,14 @@ int main()
         return -1;
     }
 
-    //save the times
-    struct timeval start, end;
-    gettimeofday(&start, 0);
-
     int get = 0; //var which save if the better_ping got pong
     int isOK = 1; // var which sent to the better_ping "you can sent a ping"
     int sent = 0; // var will contain the number of bytes the send send
     int recv2 = 1; // var will ask if we got message in the recv
+
+    //save the times
+    struct timeval start, end;
+    gettimeofday(&start, 0);
 
     // save the end time (just for the first ping)
     gettimeofday(&end, 0);
@@ -104,7 +104,7 @@ int main()
 
         //while we didnt get any message from the better_ping and the timer didnt got to 10 try to recv
         recv2 = 0;
-        while (((milliseconds = (end.tv_sec - start.tv_sec) * 1000.0f + (end.tv_usec - start.tv_usec) / 1000.0f) < 10000) && recv2 <= 0)
+        while (((milliseconds = (end.tv_sec - start.tv_sec) * 1000.0f + (end.tv_usec - start.tv_usec) / 1000.0f) < 11000) && recv2 <= 0)
         {
             recv2 = recv(senderSocket, &get, sizeof(get), MSG_DONTWAIT); 
             gettimeofday(&end, 0);
@@ -117,6 +117,7 @@ int main()
     isOK = 0;
     send(senderSocket, &isOK,sizeof(isOK), 0);
     close (senderSocket);
+    close(sock);
 
     return 0;
 }
